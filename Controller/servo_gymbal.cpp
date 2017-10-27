@@ -33,8 +33,8 @@ SOFTWARE.
 // Calibrated for a Robot Geek RGS-13 Servo
 // Make sure these are appropriate for the servo being used!
 
-// int servoMin = 120 ;
-// int servoMax = 720 ;
+int servoMin = 120 ;
+int servoMax = 720 ;
 
 int getkey() {
     int character;
@@ -83,14 +83,16 @@ int main() {
         pca9685->setPWMFrequency(60) ;
         // 27 is the ESC key
         printf("Hit ESC key to exit\n");
+        pca9685->setPWM(0,0,servoMax);
+        pca9685->setPWM(1,0,servoMax);
+
+        servoPitch = python_tuple[0];
+        servoYaw = python_tuple[1];
+
         while(pca9685->error >= 0 && getkey() != 27){
 
-            pca9685->setPWM(0,0,servoMin) ;
-            pca9685->setPWM(1,0,servoMin) ;
-
-            sleep(2) ;
-            pca9685->setPWM(0,0,servoMax) ;
-            pca9685->setPWM(1,0,map(90,0,180,servoMin, servoMax)) ;
+            pca9685->setPWM(0,0,map(servoPitch,0,180,servoMin, servoMax)) ;
+            pca9685->setPWM(1,0,map(servoYaw,0,180,servoMin, servoMax)) ;
             sleep(2) ;
         }
         pca9685->setPWM(1,0,map(0,0,180,servoMin, servoMax));
@@ -99,3 +101,11 @@ int main() {
     }
     pca9685->closePCA9685();
 }
+
+#include <boost python.hpp>
+using namespace boost::python;
+
+BOOST_PYTHON_MODULE(servo){
+    def("servo", main);
+}
+
