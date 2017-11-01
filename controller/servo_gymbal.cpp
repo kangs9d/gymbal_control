@@ -71,6 +71,35 @@ int map ( int x, int in_min, int in_max, int out_min, int out_max) {
     return toReturn ;
 }
 
+int setAngle(port, angle) {
+    while(pca9685->error >= 0 && getkey() != 27){
+        pca9685->setPWM(port,0,map(angle,0,180,servoMin, servoMax));
+        sleep(2) ;
+    }
+}
+
+int init(portPWM) {
+    PCA9685 *pca9685 = new PCA9685();
+    int err = pca9685->openPCA9685();
+    if (err < 0){
+        printf("Error: %d", pca9685 -> error);
+    } else {
+        printf("PCA9685 Device Adress : 0x%02X\n", pca9685->kI2CAddress);
+        pca9685 -> setAllPWM(0,0);
+        pca9685 -> reset();
+        pca9685 -> setPWMFrequency(60);
+    }
+}
+
+#include <boost python.hpp>
+using namespace boost::python;
+
+BOOST_PYTHON_MODULE(servo){
+    def("servo", main);
+}
+
+
+/*
 int main() {
     PCA9685 *pca9685 = new PCA9685() ;
     int err = pca9685->openPCA9685();
@@ -91,8 +120,8 @@ int main() {
 
         while(pca9685->error >= 0 && getkey() != 27){
 
-            pca9685->setPWM(0,0,map(servoPitch,0,180,servoMin, servoMax)) ;
-            pca9685->setPWM(1,0,map(servoYaw,0,180,servoMin, servoMax)) ;
+            pca9685->setPWM(0,0,map(servoPitch,0,180,servoMin, servoMax));
+            pca9685->setPWM(1,0,map(servoYaw,0,180,servoMin, servoMax));
             sleep(2) ;
         }
         pca9685->setPWM(1,0,map(0,0,180,servoMin, servoMax));
@@ -101,11 +130,4 @@ int main() {
     }
     pca9685->closePCA9685();
 }
-
-#include <boost python.hpp>
-using namespace boost::python;
-
-BOOST_PYTHON_MODULE(servo){
-    def("servo", main);
-}
-
+*/
